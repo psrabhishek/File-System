@@ -12,8 +12,8 @@ unsigned int get_file_size(char* file_name)
 void write_block(int block, void* buff)
 {
 	FILE* fp = fopen(hdd_file, "rb+");
-	fseek(fp, block * 16 * 1024, SEEK_SET);
-	fwrite(buff, 1, 16 * 1024, fp);
+	fseek(fp, block * blockSize * bytesInBlock, SEEK_SET);
+	fwrite(buff, 1, blockSize * bytesInBlock, fp);
 	fclose(fp);
 }
 
@@ -25,8 +25,22 @@ int read_block(int block, void* buff)
 		printf("Please mount proper disk\n");
 		return 0;
 	}
-	fseek(fp, block * 16 * 1024, SEEK_SET);
-	fread(buff, 1, 16 * 1024, fp);
+	fseek(fp, block * blockSize * bytesInBlock, SEEK_SET);
+	fread(buff, 1, blockSize * bytesInBlock, fp);
+	fclose(fp);
+	return 1;
+}
+
+int read_meta(void* buff, int size)
+{
+	FILE* fp = fopen(hdd_file, "rb+");
+	if (!fp)
+	{
+		printf("Please mount proper disk\n");
+		return 0;
+	}
+	fseek(fp, 0, SEEK_SET);
+	fread(buff, 1, size, fp);
 	fclose(fp);
 	return 1;
 }
@@ -34,23 +48,32 @@ int read_block(int block, void* buff)
 void init(char* file_name, int block_size)
 {
 	strcpy(hdd_file, file_name);
-	/*int* n = (int*) malloc(4);
 	FILE* fp = fopen(hdd_file, "rb+");
-	fread(&n, 4, 1, fp);
-	if (*n != 98989898)
+	if (!fp)
 	{
-		printf("File is not formatted\n");
+		printf("Disk \"%s\" not found\n", hdd_file);
+		strcpy(hdd_file, "");
 	}
 	else
 	{
-		fread(&n, 4, 1, fp);
-		printf("block size is %d\n", n);
-		init_struct(get_file_size(file_name), n);
-
+		printf("Disk \"%s\" Mounted Succesfully\n", hdd_file);
+		blockSize = block_size;
 	}
-	fclose(fp);*/
-#undef f
-#define f get_file_size(file_name)
-#undef f
-#define b block_size
+	fclose(fp);
+}
+
+int get_block_size()
+{
+	return blockSize ;
+}
+
+char* get_hdd_path()
+{
+	return hdd_file;
+}
+
+void unmount()
+{
+	strcpy(hdd_file, "");
+	printf("Un-Mounted Succesfully\n");
 }

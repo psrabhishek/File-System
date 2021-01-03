@@ -16,3 +16,5 @@ void del(char* filename, char*buff);
 void list();
 
 void debug();
+
+void set_meta( char* data);
